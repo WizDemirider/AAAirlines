@@ -5,13 +5,21 @@
  */
 package aaairlines;
 
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.BaseColor;
 import java.io.FileOutputStream;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.Image;
 import java.io.*;
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -26,7 +34,7 @@ public class plane extends javax.swing.JFrame {
     static Connection conn;
     static Statement stmt;
     
-    String pseats[],pnames[],text="";
+    String pseats[],pnames[],text="<html><table><tr><th>Number</th><th>Seat</th><th>Name</th></tr>",ticket="";
     
     public plane(String seats[],String names[]) {
         pseats=seats;
@@ -34,10 +42,11 @@ public class plane extends javax.swing.JFrame {
         
         for(int i=0;i<pseats.length;i++)
         {
-            text=text.concat((i+1)+". "+pseats[i]+"   "+pnames[i]+"\n");
+            text=text.concat("<tr><td>"+(i+1)+"</td><td>"+pseats[i]+"</td><td>"+pnames[i]+"</td>");
+            ticket=ticket.concat((i+1)+" "+pseats[i]+" "+pnames[i]+"\n");
         }
         initComponents();
-        TextBoxLabel.setText(text);
+        TextBoxLabel.setText(text+"</table></html>");
         try
         {
             Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
@@ -49,8 +58,6 @@ public class plane extends javax.swing.JFrame {
         {
             e.printStackTrace();
         }
-        for(int i=0;i<seats.length;i++)
-            insertDB(pseats[i],pnames[i]);
     }
 
     public void insertDB(String seat,String name)
@@ -155,6 +162,8 @@ public class plane extends javax.swing.JFrame {
 
     private void pdfbuttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pdfbuttonActionPerformed
         // TODO add your handling code here:
+        JFrame frame = new JFrame();
+        JOptionPane.showMessageDialog(frame,"E-ticket created");
         try
         {
             createpdf();
@@ -163,6 +172,8 @@ public class plane extends javax.swing.JFrame {
         {
             e.printStackTrace();
         }
+        for(int i=0;i<pseats.length;i++)
+            insertDB(pseats[i],pnames[i]);
         
     }//GEN-LAST:event_pdfbuttonActionPerformed
 
@@ -176,7 +187,21 @@ public class plane extends javax.swing.JFrame {
         FileOutputStream fos=new FileOutputStream("eticket.pdf");
         PdfWriter.getInstance(document, fos);
         document.open();
-        document.add(new Paragraph(text));
+        document.add(new Paragraph("                         AAAIRLINES"));
+        try {
+            Image image = Image.getInstance("icon.png");
+            document.add(image);
+        } catch (BadElementException ex) {
+            Logger.getLogger(plane.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(plane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        document.add(new Paragraph("                           E-TICKET"));
+        document.add(new Paragraph("Flight no. 303  flying from Mumbai to Singapore"));
+        document.add(new Paragraph("  Seat  Name"));
+        document.add(new Paragraph(ticket));
+        document.add(new Paragraph(" "));
+        document.add(new Paragraph("Thank you for choosing AAAirlines"));
         document.close();
     }
     /**

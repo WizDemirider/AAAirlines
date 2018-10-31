@@ -196,7 +196,8 @@ public class Home extends javax.swing.JFrame {
         else
         for(int i=0;i<seats.length;i++)
         {
-            seats[i]=seats[i].replaceAll("[^A-Z0-9]","");
+            seats[i]=seats[i].replaceAll("[^A-Z 0-9]","");
+            seats[i]=seats[i].trim();
             names[i]=names[i].replaceAll("[^A-Za-z]","");
             
             if(names[i].length()==0)
